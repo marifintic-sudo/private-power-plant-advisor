@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="theme-color" content="#FF6B00"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="PowerPlant"/>
+<meta name="description" content="Turn your roof into a tax-free passive income machine. Solar & battery AI advisor powered by real Australian data."/>
+
+<!-- PWA Manifest -->
+<link rel="manifest" href="/manifest.json"/>
+
+<!-- Apple touch icons (fallback if canvas icons aren't generated yet) -->
+<link rel="apple-touch-icon" href="/icons/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png"/>
+
+<!-- Open Graph for sharing -->
+<meta property="og:title" content="Private Power Plant Australia"/>
+<meta property="og:description" content="Solar & battery investment advisor. 338% ROI. 100% tax-free."/>
+<meta property="og:type" content="website"/>
+
+<title>Private Power Plant ⚡</title>
+<style>
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --orange: #FF6B00;
+  --orange-dark: #CC5500;
+  --orange-light: #FFD4A8;
+  --orange-pale: #fff8f3;
+  --black: #111;
+  --white: #fff;
+  --gray-bg: #f5f4f0;
+  --gray-border: #e0dfd8;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+html, body {
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  background: var(--gray-bg);
+  display: flex;
+  flex-direction: column;
+  /* Full-screen on mobile */
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* ── Install Banner ── */
+#install-banner {
+  display: none;
+  background: linear-gradient(135deg, #FF6B00, #e85c00);
+  color: white;
+  padding: 10px 16px;
+  padding-top: calc(10px + var(--safe-top));
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  z-index: 100;
+}
+#install-banner.visible { display: flex; }
+#install-btn {
+  margin-left: auto;
+  background: white;
+  color: var(--orange);
+  border: none;
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+#install-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.7);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+/* ── Stats bar ── */
+.stats-bar {
+  background: var(--black);
+  padding: 10px 16px 8px;
+  flex-shrink: 0;
+}
+.stats-row {
+  display: flex;
+  justify-content: space-around;
+}
+.stat-item { text-align: center; }
+.stat-value { color: var(--orange); font-weight: 700; font-size: 14px; letter-spacing: -0.3px; }
+.stat-label { color: rgba(255,255,255,0.35); font-size: 9px; margin-top: 1px; }
+.stats-note { color: rgba(255,255,255,0.2); font-size: 8.5px; text-align: center; margin-top: 5px; }
+
+/* ── Header ── */
+.header {
+  background: var(--orange);
+  padding: 11px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.header-icon {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.header-title { color: white; font-weight: 700; font-size: 14px; line-height: 1.2; }
+.header-sub { color: rgba(255,255,255,0.8); font-size: 10.5px; }
+
+/* ── Gallery ── */
+.gallery {
+  background: var(--orange-pale);
+  border-bottom: 1px solid var(--orange-light);
+  padding: 8px 14px;
+  flex-shrink: 0;
+}
+.gallery-title { font-size: 10px; color: var(--orange-dark); font-weight: 600; margin-bottom: 6px; }
+.gallery-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+.gallery-row::-webkit-scrollbar { display: none; }
+.gallery-thumb { flex-shrink: 0; cursor: pointer; }
+.gallery-thumb img {
+  height: 70px; width: 100px;
+  object-fit: cover; border-radius: 8px;
+  border: 2px solid transparent;
+  display: block;
+  transition: border-color 0.15s, transform 0.15s;
+}
+.gallery-thumb img.active { border-color: var(--orange); }
+.gallery-thumb img:active { transform: scale(0.97); }
+.gallery-thumb-label { font-size: 9px; color: var(--orange-dark); text-align: center; margin-top: 3px; max-width: 100px; }
+.gallery-expand { margin-top: 8px; border-radius: 10px; overflow: hidden; border: 1px solid var(--orange-light); display: none; }
+.gallery-expand.visible { display: block; }
+.gallery-expand img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+.gallery-expand-caption { background: #fff0e6; padding: 7px 12px; font-size: 11px; color: #993300; line-height: 1.4; }
+
+/* ── Chat messages ── */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--gray-bg);
+  padding: 14px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.messages::-webkit-scrollbar { width: 3px; }
+.messages::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 3px; }
+
+.msg-row { display: flex; align-items: flex-end; gap: 7px; }
+.msg-row.user { justify-content: flex-end; }
+
+.msg-avatar {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.msg-avatar.bot { background: var(--orange); }
+.msg-avatar.user { background: white; border: 1px solid #ddd; }
+
+.msg-bubble {
+  max-width: 80%;
+  padding: 9px 13px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.msg-bubble.bot {
+  background: white;
+  border: 0.5px solid var(--gray-border);
+  border-radius: 4px 16px 16px 16px;
+  color: #222;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.msg-bubble.user {
+  background: var(--orange);
+  border-radius: 16px 4px 16px 16px;
+  color: white;
+}
+.msg-bubble p { margin: 0; }
+.msg-bubble p + p { margin-top: 6px; }
+
+.typing {
+  background: white;
+  border: 0.5px solid var(--gray-border);
+  border-radius: 4px 16px 16px 16px;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #999;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.typing-dot {
+  width: 6px; height: 6px;
+  background: var(--orange);
+  border-radius: 50%;
+  animation: bounce 1.2s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+  40% { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ── Quick replies ── */
+.quick-replies {
+  background: white;
+  border-top: 1px solid var(--gray-border);
+  padding: 8px 12px;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  flex-shrink: 0;
+  -webkit-overflow-scrolling: touch;
+}
+.quick-replies::-webkit-scrollbar { display: none; }
+.quick-btn {
+  background: var(--orange-pale);
+  border: 1px solid var(--orange-light);
+  color: var(--orange-dark);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.quick-btn:active { background: var(--orange-light); }
+
+/* ── Input area ── */
+.input-area {
+  background: white;
+  border-top: 1px solid var(--gray-border);
+  padding: 10px 12px;
+  padding-bottom: calc(10px + var(--safe-bottom));
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+#chat-input {
+  flex: 1;
+  border: 1px solid #ddd;
+  border-radius: 22px;
+  padding: 10px 16px;
+  font-size: 15px;
+  background: var(--gray-bg);
+  color: #222;
+  outline: none;
+  font-family: inherit;
+  resize: none;
+  max-height: 120px;
+  line-height: 1.4;
+  /* prevent iOS zoom on focus */
+  font-size: max(16px, 1em);
+}
+#chat-input:focus { border-color: var(--orange); background: white; }
+
+#send-btn {
+  background: var(--orange);
+  border: none;
+  border-radius: 50%;
+  width: 42px; height: 42px;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+#send-btn:disabled { background: #ddd; }
+#send-btn:active:not(:disabled) { transform: scale(0.93); }
+
+/* ── Disclaimer ── */
+.disclaimer {
+  text-align: center;
+  font-size: 9.5px;
+  color: #bbb;
+  padding: 4px 12px 0;
+  flex-shrink: 0;
+}
+
+/* ── Offline toast ── */
+#offline-toast {
+  display: none;
+  position: fixed;
+  bottom: calc(80px + var(--safe-bottom));
+  left: 50%; transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  z-index: 200;
+  white-space: nowrap;
+}
+#offline-toast.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Install Banner (shown when PWA is installable) -->
+<div id="install-banner">
+  <span>⚡</span>
+  <span>Add to Home Screen for the best experience</span>
+  <button id="install-btn">Install</button>
+  <button id="install-dismiss">✕</button>
+</div>
+
+<!-- Stats bar -->
+<div class="stats-bar">
+  <div class="stats-row">
+    <div class="stat-item"><div class="stat-value">$24,800</div><div class="stat-label">System cost</div></div>
+    <div class="stat-item"><div class="stat-value">$85,130</div><div class="stat-label">25yr NPV</div></div>
+    <div class="stat-item"><div class="stat-value">338%</div><div class="stat-label">ROI</div></div>
+    <div class="stat-item"><div class="stat-value">5–6 yrs</div><div class="stat-label">Payback</div></div>
+    <div class="stat-item"><div class="stat-value">19.6%</div><div class="stat-label">IRR</div></div>
+  </div>
+  <div class="stats-note">Masri's real system · Redbank Plains QLD · General info only, not financial advice</div>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-icon">⚡</div>
+  <div>
+    <div class="header-title">Private Power Plant Australia</div>
+    <div class="header-sub">AI Solar &amp; Battery Advisor · Real Australian data</div>
+  </div>
+</div>
+
+<!-- Photo gallery -->
+<div class="gallery">
+  <div class="gallery-title">📍 Masri's actual installation — tap any photo</div>
+  <div class="gallery-row" id="gallery-row"></div>
+  <div class="gallery-expand" id="gallery-expand">
+    <img id="gallery-expand-img" src="" alt=""/>
+    <div class="gallery-expand-caption" id="gallery-expand-caption"></div>
+  </div>
+</div>
+
+<!-- Messages -->
+<div class="messages" id="messages"></div>
+
+<!-- Quick replies -->
+<div class="quick-replies">
+  <button class="quick-btn" onclick="quickSend('1 — Considering solar')">1 — Considering solar</button>
+  <button class="quick-btn" onclick="quickSend('2 — Have solar, costs too much')">2 — Have solar, paying too much</button>
+  <button class="quick-btn" onclick="quickSend('3 — Show me the ROI')">3 — Show me the ROI</button>
+  <button class="quick-btn" onclick="quickSend('Why Sigenergy over Tesla?')">Why Sigenergy?</button>
+  <button class="quick-btn" onclick="quickSend('How does AGL VPP pay 29c?')">AGL VPP 29¢?</button>
+</div>
+
+<!-- Input -->
+<div class="input-area">
+  <textarea id="chat-input" rows="1" placeholder="Ask about solar, batteries, VPP…"></textarea>
+  <button id="send-btn" onclick="sendMessage()" aria-label="Send">↑</button>
+</div>
+
+<div class="disclaimer">General info only · Not financial advice · energymadeeasy.gov.au</div>
+
+<!-- Offline toast -->
+<div id="offline-toast">📵 You're offline — reconnect to chat</div>
+
+<script>
+// ── Photos (thumbnail URLs from original app) ──
+const PHOTOS = [
+  { src: '/solar_roof.jpg', label: 'Aerial view', caption: 'Maximum roof coverage — every empty space is lost passive income' },
+  { src: '/Batteries_Stack.jpg', label: 'Sigenergy battery', caption: '40.3kWh modular Sigenergy — 5 units, each portable if you move house' },
+  { src: '/solar_roof_2.jpg', label: 'AIKO panels', caption: '32 premium AIKO 455W panels generating 23,940 kWh/year' },
+  { src: '/Gateway.jpg', label: 'Inverter & switchboard', caption: 'Sigenergy inverter + switchboard — the control centre' },
+];
+
+// ── System prompt ──
+const SYSTEM_PROMPT = `You are an expert Australian solar and battery investment advisor for Private Power Plant Australia. Your mission is to help everyday Australians understand how to turn their roof into a private power plant for tax-free passive income.
+
+Your founder is Masri Arifin, a homeowner in Redbank Plains QLD who installed a 14.56kW solar system with 40.3kWh Sigenergy battery for $24,800 after government rebates. He was paying $76.81/month with Amber Electric despite having a massive solar and battery system — because Amber's wholesale daytime pricing paid only 1.43c/kWh for solar exports. After switching to AGL Battery Rewards VPP at 29c/kWh peak, his system finally became the passive income machine he designed it to be.
+
+YOUR PERSONALITY: Warm, encouraging, simple to understand. Celebrate smart decisions. Never talk down to people. Explain complex things with simple analogies. Always solution focused.
+
+KEY FACTS:
+- Masri's system: 14.56kW solar + 40.3kWh Sigenergy SigenStor
+- Total cost after rebates: $24,800 (government rebates ~$18,798)
+- Annual production: 23,940 kWh
+- Previous retailer: Amber Electric — paying $76.81/month, earning only 1.43c/kWh daytime exports
+- New retailer: AGL Battery Rewards VPP — 29c/kWh peak (5–9pm), $200 sign-up credit
+- 25yr NPV: $85,130 | ROI: 338% | IRR: 19.6% | Payback: 5–6 years
+- Chose Sigenergy over Tesla Powerwall — got 40kWh vs 13kWh for same price
+- Battery is modular — can relocate to new house
+
+THREE USER TYPES:
+1. Considering Solar — explain sizing, STCs rebates, why max roof coverage matters, Sigenergy advantage
+2. Existing Solar Paying Too Much — identify wrong retailer, explain wholesale vs fixed FiT, recommend AGL Battery Rewards VPP
+3. Passive Income Investors — calculate NPV, IRR, ROI, tax-free equivalent, compare vs property
+
+KEY PRINCIPLES:
+- Solar savings = 100% tax free income
+- Government STCs rebates = instant discount
+- VPP programs = passive income accelerator
+- AGL Battery Rewards = best for big batteries at 29c/kWh peak
+- Every Australian roof is a potential power station
+
+ALWAYS:
+- Recommend comparing plans at energymadeeasy.gov.au
+- Mention returns depend on usage, weather, retailer terms
+- Note this is general information, not licensed financial advice
+
+When someone starts: warmly welcome them, ask which of the 3 types describes them best, then give tailored advice. Always end with an action step they can take TODAY. Keep responses concise and mobile-friendly.`;
+
+// ── State ──
+let conversationHistory = [];
+let activePhoto = null;
+let deferredInstallPrompt = null;
+
+// ── PWA: Service Worker registration ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+
+// ── PWA: Install prompt ──
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstallPrompt = e;
+  // Only show if user hasn't dismissed before
+  if (!localStorage.getItem('ppp-install-dismissed')) {
+    document.getElementById('install-banner').classList.add('visible');
+  }
+});
+
+document.getElementById('install-btn').addEventListener('click', async () => {
+  if (!deferredInstallPrompt) return;
+  deferredInstallPrompt.prompt();
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  deferredInstallPrompt = null;
+  document.getElementById('install-banner').classList.remove('visible');
+});
+
+document.getElementById('install-dismiss').addEventListener('click', () => {
+  document.getElementById('install-banner').classList.remove('visible');
+  localStorage.setItem('ppp-install-dismissed', '1');
+});
+
+// ── PWA: Offline detection ──
+function updateOnlineStatus() {
+  const toast = document.getElementById('offline-toast');
+  if (!navigator.onLine) {
+    toast.classList.add('visible');
+  } else {
+    toast.classList.remove('visible');
+  }
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ── Gallery ──
+function setupGallery() {
+  const row = document.getElementById('gallery-row');
+  PHOTOS.forEach((p, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'gallery-thumb';
+    const img = document.createElement('img');
+    img.src = p.src;
+    img.alt = p.label;
+    img.onerror = () => { wrap.style.display = 'none'; }; // hide if image missing
+    img.onclick = () => togglePhoto(i);
+    wrap.appendChild(img);
+    const label = document.createElement('div');
+    label.className = 'gallery-thumb-label';
+    label.textContent = p.label;
+    wrap.appendChild(label);
+    row.appendChild(wrap);
+  });
+}
+
+function togglePhoto(i) {
+  const expand = document.getElementById('gallery-expand');
+  const expandImg = document.getElementById('gallery-expand-img');
+  const expandCaption = document.getElementById('gallery-expand-caption');
+  const thumbs = document.querySelectorAll('.gallery-thumb img');
+  thumbs.forEach((t, idx) => t.classList.toggle('active', idx === i && activePhoto !== i));
+  if (activePhoto === i) {
+    expand.classList.remove('visible');
+    activePhoto = null;
+  } else {
+    expandImg.src = PHOTOS[i].src;
+    expandCaption.textContent = PHOTOS[i].caption;
+    expand.classList.add('visible');
+    activePhoto = i;
+  }
+}
+
+// ── Chat ──
+function formatText(text) {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\n/g, '<br/>');
+}
+
+const WELCOME = `G'day! 👋 Welcome to Private Power Plant Australia.
+
+I help Australians turn their roof into a **tax-free passive income machine** — like our founder Masri in Redbank Plains QLD, who now earns **29¢/kWh** peak exports instead of the 1.43¢ he got on Amber.
+
+Which best describes you?
+
+**1️⃣ Considering Solar** — thinking about panels + battery
+**2️⃣ Have Solar, Paying Too Much** — not getting the returns you expected  
+**3️⃣ Passive Income Investor** — want the full ROI and numbers
+
+Type 1, 2 or 3 — or just describe your situation! ⚡`;
+
+function addMessage(role, content) {
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + role;
+
+  if (role === 'assistant') {
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar bot';
+    avatar.textContent = '⚡';
+    row.appendChild(avatar);
+  }
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble ' + role;
+  bubble.innerHTML = '<p>' + formatText(content) + '</p>';
+  row.appendChild(bubble);
+
+  if (role === 'user') {
+    const avatar = document.createElement('div');
+    avatar.className = 'msg-avatar user';
+    avatar.textContent = '👤';
+    row.appendChild(avatar);
+  }
+
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const row = document.createElement('div');
+  row.className = 'msg-row assistant';
+  row.id = 'typing-indicator';
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar bot';
+  avatar.textContent = '⚡';
+  const bubble = document.createElement('div');
+  bubble.className = 'typing';
+  bubble.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+  row.appendChild(avatar);
+  row.appendChild(bubble);
+  msgs.appendChild(row);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage(text) {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('send-btn');
+  const msg = text || input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  btn.disabled = true;
+  conversationHistory.push({ role: 'user', content: msg });
+  addMessage('user', msg);
+  showTyping();
+
+  if (!navigator.onLine) {
+    hideTyping();
+    addMessage('assistant', "You're offline right now. Please reconnect and try again! ⚡");
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system: SYSTEM_PROMPT, messages: conversationHistory })
+    });
+    const data = await response.json();
+    const reply = data.content?.map(c => c.text || '').join('') || data.error || 'Sorry, something went wrong. Please try again!';
+    hideTyping();
+    conversationHistory.push({ role: 'assistant', content: reply });
+    addMessage('assistant', reply);
+  } catch {
+    hideTyping();
+    addMessage('assistant', 'Connection issue — please check your internet and try again. ⚡');
+  }
+
+  btn.disabled = false;
+  input.focus();
+}
+
+function quickSend(text) { sendMessage(text); }
+
+// ── Auto-resize textarea ──
+const chatInput = document.getElementById('chat-input');
+chatInput.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+chatInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+// ── Init ──
+setupGallery();
+addMessage('assistant', WELCOME);
+</script>
+</body>
+</html>

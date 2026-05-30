@@ -1,0 +1,50 @@
+{
+  "name": "Private Power Plant Australia",
+  "short_name": "PowerPlant",
+  "description": "Turn your roof into a tax-free passive income machine. Solar & battery investment advisor.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#FF6B00",
+  "categories": ["finance", "utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/screen1.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Solar Investment Advisor Chat"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Ask About Solar",
+      "short_name": "Solar",
+      "description": "Get solar system advice",
+      "url": "/?q=considering-solar",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Calculate ROI",
+      "short_name": "ROI",
+      "description": "Calculate your solar return on investment",
+      "url": "/?q=show-roi",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

@@ -1,15 +1,12 @@
 {
   "name": "private-power-plant-advisor",
-  "version": "1.0.0",
-  "description": "Private Power Plant Australia — AI Solar & Battery Advisor",
+  "version": "2.0.0",
+  "description": "Private Power Plant Australia — Solar & Battery AI Advisor (PWA)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  "dependencies": {
-    "express": "^4.18.2"
-  },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18"
   }
 }

@@ -3,7 +3,14 @@ const path = require('path');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// Serve the advisor as the root page (fix: was looking in /public/ which doesn't exist)
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'private_power_plant_advisor.html'));
+});
+
+// Serve static files from root directory
+app.use(express.static(__dirname));
 
 // Proxy endpoint — keeps API key server-side, uses Google Gemini (free)
 app.post('/api/chat', async (req, res) => {
@@ -35,7 +42,6 @@ app.post('/api/chat', async (req, res) => {
     );
 
     const data = await response.json();
-    // Normalise response to match what the frontend expects
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Sorry, something went wrong. Please try again!';
     res.json({ content: [{ type: 'text', text }] });
 
